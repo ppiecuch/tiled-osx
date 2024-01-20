@@ -1,0 +1,20 @@
+--- t3config/src/Makefile.orig	2024-01-20 01:26:17
++++ t3config/src/Makefile	2024-01-20 01:26:29
+@@ -36,7 +36,7 @@
+ CFLAGS += -I.objects
+ CFLAGS += -DHAS_STRDUP
+-CFLAGS += -DHAS_USELOCALE
+-CFLAGS += -DUSE_GETTEXT
+-#~ CFLAGS += -DNO_XDG
++#CFLAGS += -DHAS_USELOCALE
++#CFLAGS += -DUSE_GETTEXT
++CFLAGS += -DNO_XDG
+ 
+ .objects/lex_hide.h: .objects/lex.c
+@@ -62,4 +62,4 @@
+ 
+ .SECONDARY: .objects/parser.c .objects/parser.h .objects/lex.c .objects/lex_hide.h
+ 
+-.PHONY: clang-format
+\ No newline at end of file
++.PHONY: clang-format

@@ -1,0 +1,20 @@
+--- t3widget/src/Makefile.orig	2024-01-20 14:41:59
++++ t3widget/src/Makefile	2024-01-20 14:42:15
+@@ -99,7 +99,7 @@
+ CXXFLAGS += -fvisibility=hidden
+ CXXFLAGS += -DWITH_X11
+ CXXFLAGS += -DX11_MOD_NAME=\"$(CURDIR)/.libs/x11.mod\"
+-CXXFLAGS += -DHAS_GPM
++#~ CXXFLAGS += -DHAS_GPM
+ #~ CXXFLAGS += -DHAS_VECTOR_SHRINK_TO_FIT
+ 
+ LDLIBS.libt3widget.la += $(T3LDFLAGS.t3window) -lt3window
+@@ -110,8 +110,8 @@
+ else
+ LDLIBS.libt3widget.la += `pkg-config --libs libpcre`
+ endif
+-LDLIBS.libt3widget.la += -lunistring
+-LDLIBS.libt3widget.la += -lgpm
++LDLIBS.libt3widget.la += /opt/macports/lib/libunistring.a
++#~ LDLIBS.libt3widget.la += -lgpm
+ LDLIBS.libt3widget.la += -lm

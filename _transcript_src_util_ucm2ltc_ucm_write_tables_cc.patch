@@ -1,0 +1,233 @@
+--- transcript/src.util/ucm2ltc/ucm_write_tables.orig.cc	2024-01-18 20:31:32
++++ transcript/src.util/ucm2ltc/ucm_write_tables.cc	2024-01-18 20:33:50
+@@ -24,7 +24,7 @@
+ // referenced values are really present! Otherwise we open up a security hole (read-only, but
+ // still)!
+ 
+-static int unique;
++static int _unique_;
+ static char *to_unicode_flags_initializer, *from_unicode_flags_initializer;
+ 
+ static void write_byte_data(FILE *output, uint8_t *data, size_t size, int indent_level) {
+@@ -83,11 +83,11 @@
+ void Ucm::write_states(FILE *output, vector<State *> &states, const char *converter_name) {
+   vector<Entry>::const_iterator entry_iter;
+ 
+-  fprintf(output, "static const state_v1_t %s_states_%d[] = {\n", converter_name, unique);
++  fprintf(output, "static const state_v1_t %s_states_%d[] = {\n", converter_name, _unique_);
+   for (vector<State *>::const_iterator state_iter = states.begin(); state_iter != states.end();
+        state_iter++) {
+     if (state_iter != states.begin()) fprintf(output, ",\n");
+-    fprintf(output, "\t{ entries_%d + %d, UINT16_C(0x%08x), {\n", unique,
++    fprintf(output, "\t{ entries_%d + %d, UINT16_C(0x%08x), {\n", _unique_,
+             (*state_iter)->entries_start, (*state_iter)->base);
+     entry_iter = (*state_iter)->entries.begin();
+     for (int i = 0, entry_nr = 0; i < 256; i++) {
+@@ -171,11 +171,11 @@
+     fprintf(output,
+             "static const multi_mapping_v1_t * const codepoint_sorted_multi_mappings_%d[] = { NULL "
+             "};\n",
+-            unique);
++            _unique_);
+     fprintf(
+         output,
+         "static const multi_mapping_v1_t * const codepage_sorted_multi_mappings_%d[] = { NULL };\n",
+-        unique);
++        _unique_);
+     return;
+   }
+ 
+@@ -202,12 +202,12 @@
+   if (variant_nr < 0)
+     fprintf(output,
+             "static const multi_mapping_v1_t * const codepoint_sorted_multi_mappings_%d[] = {\n",
+-            unique);
++            _unique_);
+   else
+     fprintf(output,
+             "static const multi_mapping_v1_t * const "
+             "variant%d_codepoint_sorted_multi_mappings_%d[] = {\n",
+-            variant_nr, unique);
++            variant_nr, _unique_);
+ 
+   for (i = 0; i < idx; i++) {
+     if ((i & 0x3) == 0) {
+@@ -217,7 +217,7 @@
+     } else {
+       fprintf(output, ", ");
+     }
+-    fprintf(output, "multi_mappings_%d + %d", unique, sorted_multi_mappings[i]->idx);
++    fprintf(output, "multi_mappings_%d + %d", _unique_, sorted_multi_mappings[i]->idx);
+   }
+   fprintf(output, "\n};\n\n");
+ 
+@@ -226,12 +226,12 @@
+   if (variant_nr < 0)
+     fprintf(output,
+             "static const multi_mapping_v1_t * const codepage_sorted_multi_mappings_%d[] = {\n",
+-            unique);
++            _unique_);
+   else
+     fprintf(output,
+             "static const multi_mapping_v1_t * const variant%d_codepage_sorted_multi_mappings_%d[] "
+             "= {\n",
+-            variant_nr, unique);
++            variant_nr, _unique_);
+ 
+   for (i = 0; i < idx; i++) {
+     if ((i & 0x3) == 0) {
+@@ -241,7 +241,7 @@
+     } else {
+       fprintf(output, ", ");
+     }
+-    fprintf(output, "multi_mappings_%d + %d", unique, sorted_multi_mappings[i]->idx);
++    fprintf(output, "multi_mappings_%d + %d", _unique_, sorted_multi_mappings[i]->idx);
+   }
+   fprintf(output, "\n};\n\n");
+   free(sorted_multi_mappings);
+@@ -269,7 +269,7 @@
+     }
+   }
+ 
+-  fprintf(output, "static const uint16_t codepage_mappings_%d[] = {\n", unique);
++  fprintf(output, "static const uint16_t codepage_mappings_%d[] = {\n", _unique_);
+   write_word_data(output, codepoints, codepage_range, 1);
+   fprintf(output, "\n};\n\n");
+   free(codepoints);
+@@ -292,7 +292,7 @@
+          codepage_bytes + idx * single_bytes);
+   }
+ 
+-  fprintf(output, "static const uint8_t unicode_mappings_%d[] = {\n", unique);
++  fprintf(output, "static const uint8_t unicode_mappings_%d[] = {\n", _unique_);
+   write_byte_data(output, codepage_bytes, unicode_range * single_bytes, 1);
+   fprintf(output, "\n};\n\n");
+   free(codepage_bytes);
+@@ -301,7 +301,7 @@
+ void Variant::write_simple_mappings(FILE *output, int variant_nr) {
+   sort_simple_mappings();
+   fprintf(output, "static const variant_mapping_v1_t variant%d_mappings_%d[] = {\n", variant_nr,
+-          unique);
++          _unique_);
+   for (vector<Mapping *>::const_iterator iter = simple_mappings.begin();
+        iter != simple_mappings.end(); iter++) {
+     if (iter != simple_mappings.begin()) fprintf(output, ",\n");
+@@ -413,22 +413,22 @@
+   }
+ 
+   if (nr_of_blocks * 2 + saved_blocks * BLOCKSIZE > store_idx) {
+-    fprintf(output, "static const uint8_t %s_unicode_flags_bytes_%d[] = {\n", name, unique);
++    fprintf(output, "static const uint8_t %s_unicode_flags_bytes_%d[] = {\n", name, _unique_);
+     write_byte_data(output, data, store_idx, 1);
+     fprintf(output, "\n};\n\n");
+     snprintf(result, sizeof(result), "{ %s_unicode_flags_bytes_%d, NULL, 0x%02x, 0x%02x }", name,
+-             unique, default_flags, flag_code);
++             _unique_, default_flags, flag_code);
+   } else {
+-    fprintf(output, "static const uint8_t %s_unicode_flags_bytes_%d[] = {\n", name, unique);
++    fprintf(output, "static const uint8_t %s_unicode_flags_bytes_%d[] = {\n", name, _unique_);
+     write_byte_data(output, blocks, saved_blocks * BLOCKSIZE, 1);
+     fprintf(output, "\n};\n\n");
+-    fprintf(output, "static const uint16_t %s_unicode_flags_indices_%d[] = {\n", name, unique);
++    fprintf(output, "static const uint16_t %s_unicode_flags_indices_%d[] = {\n", name, _unique_);
+     write_word_data(output, indices, nr_of_blocks, 1);
+     fprintf(output, "\n};\n\n");
+ 
+     snprintf(result, sizeof(result),
+              "{ %s_unicode_flags_bytes_%d, %s_unicode_flags_indices_%d, 0x%02x, 0x%02x }", name,
+-             unique, name, unique, default_flags, flag_code | 0x80);
++             _unique_, name, _unique_, default_flags, flag_code | 0x80);
+   }
+   free(indices);
+   free(blocks);
+@@ -545,22 +545,22 @@
+           "TRANSCRIPT_EXPORT const converter_tables_v1_t *transcript_get_table_%s(void) {\n",
+           normalized_name);
+   fprintf(output, "\tstatic const converter_tables_v1_t _converter = {\n");
+-  fprintf(output, "\t\t&converter_%d, ", unique);
++  fprintf(output, "\t\t&converter_%d, ", _unique_);
+   if (variant_nr < 0)
+     fprintf(output, "NULL,\n");
+   else
+-    fprintf(output, "variants_%d + %d,\n", unique, variant_nr);
++    fprintf(output, "variants_%d + %d,\n", _unique_, variant_nr);
+ 
+   if (variant_nr < 0 || variants[variant_nr]->multi_mappings.size() == 0) {
+     if (multi_mappings.empty()) {
+       fprintf(output, "\t\tNULL, NULL, ");
+     } else {
+       fprintf(output, "\t\tcodepage_sorted_multi_mappings_%d, codepoint_sorted_multi_mappings_%d, ",
+-              unique, unique);
++              _unique_, _unique_);
+     }
+   } else {
+-    fprintf(output, "\t\tvariant%d_codepage_sorted_multi_mappings_%d,\n", variant_nr, unique);
+-    fprintf(output, "\t\tvariant%d_codepoint_sorted_multi_mappings_%d, ", variant_nr, unique);
++    fprintf(output, "\t\tvariant%d_codepage_sorted_multi_mappings_%d,\n", variant_nr, _unique_);
++    fprintf(output, "\t\tvariant%d_codepoint_sorted_multi_mappings_%d, ", variant_nr, _unique_);
+   }
+   fprintf(output, "%d\n\t};\n",
+           (int)multi_mappings.size() +
+@@ -575,10 +575,10 @@
+   char normalized_name[160];
+ 
+   /* Make sure the variables for this converter are unique */
+-  unique++;
++  _unique_++;
+ 
+   /* Write all entries into a single array. */
+-  fprintf(output, "static const entry_v1_t entries_%d[] = {\n", unique);
++  fprintf(output, "static const entry_v1_t entries_%d[] = {\n", _unique_);
+   count = 0;
+   write_entries(output, codepage_states, count);
+   write_entries(output, unicode_states, count);
+@@ -590,7 +590,7 @@
+ 
+   /* Write shift sequences. */
+   if (shift_sequences.size() > 0) {
+-    fprintf(output, "static const shift_state_v1_t shift_states_%d[] = {\n", unique);
++    fprintf(output, "static const shift_state_v1_t shift_states_%d[] = {\n", _unique_);
+     for (vector<shift_sequence_t>::const_iterator shift_iter = shift_sequences.begin();
+          shift_iter != shift_sequences.end(); shift_iter++) {
+       if (shift_iter != shift_sequences.begin()) fprintf(output, ",\n");
+@@ -615,7 +615,7 @@
+     has_multi_mappings |= !(*variant_iter)->multi_mappings.empty();
+ 
+   if (has_multi_mappings) {
+-    fprintf(output, "static const multi_mapping_v1_t multi_mappings_%d[] = {\n", unique);
++    fprintf(output, "static const multi_mapping_v1_t multi_mappings_%d[] = {\n", _unique_);
+     count = 0;
+     write_multi_mappings(output, multi_mappings, count);
+     for (variant_iter = variants.begin(); variant_iter != variants.end(); variant_iter++)
+@@ -634,11 +634,11 @@
+ 
+   /* Write variants table. */
+   if (!variants.empty()) {
+-    fprintf(output, "static const variant_v1_t variants_%d[] = {\n", unique);
++    fprintf(output, "static const variant_v1_t variants_%d[] = {\n", _unique_);
+     for (variant_iter = variants.begin(), count = 0; variant_iter != variants.end();
+          variant_iter++, count++) {
+       if (count != 0) fprintf(output, ",\n");
+-      fprintf(output, "\t{ variant%d_mappings_%d, 0x%04x, 0x%04x }", count, unique,
++      fprintf(output, "\t{ variant%d_mappings_%d, 0x%04x, 0x%04x }", count, _unique_,
+               (int)(*variant_iter)->simple_mappings.size(), (*variant_iter)->flags);
+     }
+     fprintf(output, "\n};\n\n");
+@@ -648,13 +648,13 @@
+   if (used_to_unicode_flags != 0) write_to_unicode_flags(output);
+   if (used_from_unicode_flags != 0) write_from_unicode_flags(output);
+ 
+-  fprintf(output, "static const converter_v1_t converter_%d = {\n", unique);
+-  fprintf(output, "\tcodepage_states_%d, unicode_states_%d, ", unique, unique);
++  fprintf(output, "static const converter_v1_t converter_%d = {\n", _unique_);
++  fprintf(output, "\tcodepage_states_%d, unicode_states_%d, ", _unique_, _unique_);
+   if (shift_sequences.empty())
+     fprintf(output, "NULL, ");
+   else
+-    fprintf(output, "shift_states_%d, ", unique);
+-  fprintf(output, "codepage_mappings_%d, unicode_mappings_%d,\n", unique, unique);
++    fprintf(output, "shift_states_%d, ", _unique_);
++  fprintf(output, "codepage_mappings_%d, unicode_mappings_%d,\n", _unique_, _unique_);
+   fprintf(
+       output, "\t%s,\n",
+       to_unicode_flags_initializer == NULL ? "{ NULL, NULL, 0, 0 }" : to_unicode_flags_initializer);

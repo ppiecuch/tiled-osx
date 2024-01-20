@@ -1,0 +1,44 @@
+--- makesys/rules.orig.mk	2024-01-18 19:20:04
++++ makesys/rules.mk	2024-01-18 19:20:16
+@@ -96,7 +96,7 @@
+ GENLIBDIR = $(call _GENDIR_ECHO,.libs,$@)
+
+ MKPATH := $(dir $(lastword $(MAKEFILE_LIST)))
+-L = $(foreach d,$(1),-L$(d) -Wl,-rpath=$(CURDIR)/$(d))
++L = $(foreach d,$(1),-L$(d) -Wl,-rpath $(CURDIR)/$(d))
+
+ BUILDVERSION ?= debug
+ LTBUILD ?= libtool
+@@ -143,7 +143,7 @@
+ endif
+ ifndef ASAN
+ ifndef MSAN
+-	LDFLAGS := -Wl,--no-undefined
++	LDFLAGS := -Wl,-undefined,error
+ endif
+ endif
+ # Compiler specific settings. G++ requires output filtering, and Clang can do without
+@@ -235,19 +235,19 @@
+ ifeq ($(LTBUILD), libtool)
+ $(foreach PART, $(LTTARGETS), $(eval $(PART): $$(OBJECTS.$(PART)) ; \
+ 	$$(_VERBOSE_LDLT) libtool $(_VERBOSE_SILENT) --mode=link --tag=CC $$(CC) -shared $$(CFLAGS) $$(CFLAGS.$(PART)) $$(LDFLAGS) $$(LDFLAGS.$(PART)) \
+-		-o $$@ $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -rpath /usr/lib))
++		-o $$@ $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -rpath $(CURDIR)/.libs))
+
+ $(foreach PART, $(CXXLTTARGETS), $(eval $(PART): $$(OBJECTS.$(PART)) ; \
+ 	$$(_VERBOSE_LDLT) libtool $(_VERBOSE_SILENT) --mode=link --tag=CXX $$(CXX) -shared $$(CXXFLAGS) $$(CXXFLAGS.$(PART)) $$(LDFLAGS) $$(LDFLAGS.$(PART)) \
+-		-o $$@ $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -rpath /usr/lib))
++		-o $$@ $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -rpath $(CURDIR)/.libs))
+ else
+ $(foreach PART, $(LTTARGETS), $(eval $(PART): $$(OBJECTS.$(PART)) ; \
+ 	$$(_VERBOSE_LDLT) $$(GENLIBDIR) && $$(CC) -shared $$(CFLAGS) $$(CFLAGS.$(PART)) $$(LDFLAGS) $$(LDFLAGS.$(PART)) \
+-		-o `dirname $$@`/.libs/`basename $$@ .la`.so $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -Wl,-rpath /usr/lib && touch $$@))
++		-o `dirname $$@`/.libs/`basename $$@ .la`.so $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -Wl,-rpath $(CURDIR)/.libs && touch $$@))
+
+ $(foreach PART, $(CXXLTTARGETS), $(eval $(PART): $$(OBJECTS.$(PART)) ; \
+ 	$$(_VERBOSE_LDLT) $$(GENLIBDIR) && $$(CXX) -shared $$(CXXFLAGS) $$(CXXFLAGS.$(PART)) $$(LDFLAGS) $$(LDFLAGS.$(PART)) \
+-		-o `dirname $$@`/.libs/`basename $$@ .la`.so $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -Wl,-rpath /usr/lib && touch $$@))
++		-o `dirname $$@`/.libs/`basename $$@ .la`.so $$^ $$(LDLIBS) $$(LDLIBS.$(PART)) -Wl,-rpath $(CURDIR)/.libs && touch $$@))
+ endif
+
+ # Add the per target CFLAGS/CXXFLAGS to each source file

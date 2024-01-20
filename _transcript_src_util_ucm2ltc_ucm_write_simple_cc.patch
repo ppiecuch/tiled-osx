@@ -1,0 +1,70 @@
+--- transcript/src.util/ucm2ltc/ucm_write_simple.orig.cc	2024-01-18 20:38:07
++++ transcript/src.util/ucm2ltc/ucm_write_simple.cc	2024-01-18 20:39:08
+@@ -19,7 +19,7 @@
+ 
+ #include "ucm2ltc.h"
+ 
+-static int unique;
++static int _unique_;
+ 
+ static void write_byte_data(FILE *output, uint8_t *data, size_t size, int indent_level) {
+   static const char tabs[] = "\t\t\t\t\t\t\t\t";
+@@ -99,7 +99,7 @@
+     }
+   }
+ 
+-  fprintf(output, "static const uint8_t codepoint_to_byte_data_%d[%d][32] = {\n", unique,
++  fprintf(output, "static const uint8_t codepoint_to_byte_data_%d[%d][32] = {\n", _unique_,
+           level1_map_used);
+   for (i = 0; i < level1_map_used; i++) {
+     if (i != 0) fprintf(output, " },\n");
+@@ -107,7 +107,7 @@
+     write_byte_data(output, map[i], 32, 2);
+   }
+   fprintf(output, " }\n};\n\n");
+-  fprintf(output, "static const uint8_t codepoint_to_byte_idx1_%d[%d][32] = {\n", unique,
++  fprintf(output, "static const uint8_t codepoint_to_byte_idx1_%d[%d][32] = {\n", _unique_,
+           level0_map_used);
+   for (i = 0; i < level0_map_used; i++) {
+     if (i != 0) fprintf(output, " },\n");
+@@ -130,7 +130,7 @@
+         flag_data[idx >> 3] |= 1 << (idx & 7);
+       }
+     }
+-    fprintf(output, "static const uint8_t codepoint_to_byte_flags_%d[%d] = {\n\t", unique,
++    fprintf(output, "static const uint8_t codepoint_to_byte_flags_%d[%d] = {\n\t", _unique_,
+             level1_map_used * 4);
+     write_byte_data(output, flag_data, level1_map_used * 4, 1);
+     fprintf(output, "\n};\n\n");
+@@ -144,7 +144,7 @@
+   uint8_t *level0_indices;
+   vector<Mapping *>::const_iterator iter;
+ 
+-  unique++;
++  _unique_++;
+ 
+   memset(byte_to_codepoint, 0xff, sizeof(byte_to_codepoint));
+   for (iter = simple_mappings.begin(); iter != simple_mappings.end(); iter++) {
+@@ -161,12 +161,12 @@
+   }
+ 
+   level0_indices = write_simple_from_unicode(output);
+-  fprintf(output, "static const sbcs_converter_v1_t sbcs_converter_%d = {\n", unique);
++  fprintf(output, "static const sbcs_converter_v1_t sbcs_converter_%d = {\n", _unique_);
+   if (used_from_unicode_flags & Mapping::FROM_UNICODE_FALLBACK)
+-    fprintf(output, "\tcodepoint_to_byte_flags_%d, ", unique);
++    fprintf(output, "\tcodepoint_to_byte_flags_%d, ", _unique_);
+   else
+     fprintf(output, "\tNULL, ");
+-  fprintf(output, "codepoint_to_byte_data_%d, codepoint_to_byte_idx1_%d,\n", unique, unique);
++  fprintf(output, "codepoint_to_byte_data_%d, codepoint_to_byte_idx1_%d,\n", _unique_, _unique_);
+   fprintf(output, "\t{ ");
+   write_byte_data(output, level0_indices, 64, 2);
+   fprintf(output, " },\n\t{ ");
+@@ -200,5 +200,5 @@
+   fprintf(output,
+           "TRANSCRIPT_EXPORT const sbcs_converter_v1_t *transcript_get_table_%s(void) { return "
+           "&sbcs_converter_%d; }\n\n",
+-          variant.normalized_id, unique);
++          variant.normalized_id, _unique_);
+ }

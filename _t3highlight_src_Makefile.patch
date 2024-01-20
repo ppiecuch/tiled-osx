@@ -1,0 +1,20 @@
+--- t3highlight/src/Makefile.orig	2024-01-20 10:30:37
++++ t3highlight/src/Makefile	2024-01-20 10:30:44
+@@ -20,8 +20,16 @@
+ LDFLAGS.libt3highlight.la += $(T3LDFLAGS.t3config)
+ ifeq ($(PCRE_COMPAT), 0)
+-LDFLAGS.libt3highlight.la += `pkg-config --libs libpcre2-8`
++LDFLAGS.libt3highlight.la += /opt/macports/lib/libpcre2-8.a
++CFLAGS.highlight += `pkg-config --cflags libpcre2-8`
++CFLAGS.io += `pkg-config --cflags libpcre2-8`
++CFLAGS.match += `pkg-config --cflags libpcre2-8`
++CFLAGS.analyse += `pkg-config --cflags libpcre2-8`
+ else
+ LDFLAGS.libt3highlight.la += `pkg-config --libs libpcre`
++CFLAGS.highlight += `pkg-config --cflags libpcre`
++CFLAGS.io += `pkg-config --cflags libpcre`
++CFLAGS.match += `pkg-config --cflags libpcre`
++CFLAGS.analyse += `pkg-config --cflags libpcre`
+ endif
+ CFLAGS.highlight += -I.objects -DDATADIR='"$(CURDIR)/data"'
+ CFLAGS.io += -I.objects -DDATADIR='"$(CURDIR)/data"'

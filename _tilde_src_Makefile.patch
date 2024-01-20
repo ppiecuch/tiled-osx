@@ -1,0 +1,28 @@
+--- tilde/src/Makefile.orig	2024-01-20 16:18:07
++++ tilde/src/Makefile	2024-01-20 16:16:31
+@@ -45,20 +45,21 @@
+ 
+ LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
+ LDFLAGS += $(T3LDFLAGS.t3widget) $(T3LDFLAGS.t3window) $(T3LDFLAGS.transcript) $(T3LDFLAGS.t3config) $(T3LDFLAGS.t3highlight)
+-LDLIBS += -lunistring
++LDLIBS += /opt/macports/lib/libunistring.a
+ CXXFLAGS.option = -I.objects
+ CXXFLAGS.openfiles = -I.objects
+ 
+ CXXFLAGS += -DTILDE_DEBUG
+ CXXFLAGS += -DHAS_STRDUP
+-CXXFLAGS += -DHAS_POSIX_FALLOCATE
++#~ CXXFLAGS += -DHAS_POSIX_FALLOCATE
+ CXXFLAGS += -DHAS_SENDFILE
+-CXXFLAGS += -DHAS_COPY_FILE_RANGE
+-CXXFLAGS += -DHAS_FICLONE
++#~ CXXFLAGS += -DHAS_COPY_FILE_RANGE
++#~ CXXFLAGS += -DHAS_FICLONE
+ #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
+ CXXFLAGS += -std=c++11
+ CXXFLAGS += -DCXX11SWITCH=1
+ CXXFLAGS += -DDATADIR='"$(CURDIR)"'
++CXXFLAGS += -I/opt/macports/include
+ 
+ clean-logs:
+ 	@if [ -d .recordings ] ; then find .recordings/ -name "record-*" -mtime +7 | xargs -r rm ; fi

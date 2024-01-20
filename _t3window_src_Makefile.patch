@@ -1,0 +1,22 @@
+--- t3window/src/Makefile.orig	2024-01-20 11:21:26
++++ t3window/src/Makefile	2024-01-20 11:21:43
+@@ -15,7 +15,7 @@
+ 	input.c terminal_init.c window_paint.c utf8.c generated/chardata.c log.c
+ LDFLAGS.libt3window.la := -shared
+ CFLAGS.misc := -DUSE_GETTEXT
+-LDLIBS.libt3window.la += -lncurses -lunistring
++LDLIBS.libt3window.la += -lncurses /opt/macports/lib/libunistring.a
+ LDLIBS.libt3window.la += $(T3LDFLAGS.transcript) -ltranscript
+
+ SOURCES.test := test.c
+@@ -38,7 +38,9 @@
+ CFLAGS += -DHAS_WINSIZE_IOCTL
+ CFLAGS += -DHAS_SELECT_H
+ CFLAGS += -DHAS_STRDUP
+-CFLAGS += -DHAS_TIOCLINUX -DHAS_KDGKBENT
++CFLAGS += -DHAS_KDGKBENT
++#CFLAGS += -DHAS_TIOCLINUX -DHAS_KDGKBENT
++CFLAGS += -I/opt/macports/include
+ 
+ test: | libt3window.la
+ 
